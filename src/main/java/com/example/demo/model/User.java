@@ -1,0 +1,48 @@
+//package com.example.demo.model;
+//
+//import jakarta.persistence.*;
+//import lombok.Data;
+//// import com.fasterxml.jackson.annotation.JsonIgnore;
+//
+//@Entity
+//@Data
+//
+//public class User {
+//
+//    @Id
+//    @GeneratedValue(strategy = GenerationType.IDENTITY)
+//    private Long id;
+//
+//    @Column(unique = true)
+//    private String username;
+//
+//   // @JsonIgnore
+//    private String password;
+// }
+
+
+// ROLE-BASED AUTHORIZATION ----->
+
+package com.example.demo.model;
+import jakarta.persistence.*;
+import lombok.Data;
+
+@Entity
+@Data
+public class User {
+
+    @Id
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    private Long id;
+
+    @Column(unique = true)
+    private String username;
+
+    private String password;
+
+    private String role;
+
+    private boolean enabled = false;
+
+
+}
