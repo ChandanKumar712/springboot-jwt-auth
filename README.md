@@ -46,7 +46,7 @@ src/
 
 -------------------------------------
 
-⚙️ Docker Setup
+# ⚙️ Docker Setup
 
 Run Project
 
