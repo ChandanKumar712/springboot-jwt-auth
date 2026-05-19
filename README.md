@@ -49,12 +49,12 @@ src/
 ⚙️ Docker Setup
 
 Run Project
-
 docker-compose up --build
 
 Stop Project
-
 docker-compose down
+
+
 -------------------------------------
 
 ## Environment Variables
@@ -66,7 +66,7 @@ MAIL_PASSWORD=mail_password
 
 --------------------------------------------
 
-API Documentation
+## API Documentation
 
 Swagger UI:
 
