@@ -49,9 +49,11 @@ src/
 ⚙️ Docker Setup
 
 Run Project
+
 docker-compose up --build
 
 Stop Project
+
 docker-compose down
 -------------------------------------
 
