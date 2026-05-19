@@ -49,9 +49,11 @@ src/
 ⚙️ Docker Setup
 
 Run Project
+
 docker-compose up --build
 
 Stop Project
+
 docker-compose down
 
 
@@ -86,7 +88,7 @@ http://localhost:8082/swagger-ui/index.html
 
 ----------------------------------------------------
 
-##👨‍💻 Author
+## 👨‍💻 Author
 
 Chandan Kumar
 
