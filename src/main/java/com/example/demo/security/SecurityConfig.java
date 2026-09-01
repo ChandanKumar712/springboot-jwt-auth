@@ -54,11 +54,22 @@ import org.springframework.context.annotation.Bean;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 
+//// Added for fronted
+import org.springframework.security.config.Customizer;
+import org.springframework.http.HttpMethod;
+
+///   For Rate limiter
+import com.example.demo.ratelimit.RateLimitFilter;
+
 @Configuration
 @EnableMethodSecurity
 public class SecurityConfig {
+
+    @Autowired
+    private RateLimitFilter rateLimitFilter;
     @Autowired
     private JwtFilter jwtFilter;
+
     @Bean
     public PasswordEncoder passwordEncoder() {
         return new BCryptPasswordEncoder();
@@ -102,15 +113,22 @@ public class SecurityConfig {
         http
                 .csrf(csrf -> csrf.disable())
 
+                // For frontend connect ==> allow to use the security to CORS config
+                .cors(Customizer.withDefaults())
+
                 .logout(logout -> logout.disable())
 
                 .authorizeHttpRequests(auth -> auth
+
+                        // For frontend connect ==> preflight allow
+                        .requestMatchers(HttpMethod.OPTIONS, "/**").permitAll()
 
                         .requestMatchers(
                                 "/signup",
                                 "/login",
                                 "/refresh",
-                                "/verify",
+                              //  "/verify",
+                                "/verify-login-otp",
                                 "/forgot-password",
                                 "/reset-password",
                                 "/api/user-logout",
@@ -123,6 +141,10 @@ public class SecurityConfig {
                         .anyRequest().authenticated()
                 )
 
+                .addFilterBefore(
+                        rateLimitFilter,
+                        UsernamePasswordAuthenticationFilter.class
+                )
                 .addFilterBefore(
                         jwtFilter,
                         UsernamePasswordAuthenticationFilter.class

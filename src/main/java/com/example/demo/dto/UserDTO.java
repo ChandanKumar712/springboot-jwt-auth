@@ -18,6 +18,7 @@ import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.Size;
 
 import lombok.Data;
+import jakarta.validation.constraints.Email;
 
 @Data
 public class UserDTO {
@@ -28,26 +29,8 @@ public class UserDTO {
     @NotBlank(message = "Password cannot be empty")
     @Size(min = 4, message = "Password must be at least 4 characters")
     private String password;
+
+    @NotBlank(message = "Email cannot be empty")
+    @Email(message = "Invalid email format")
+    private String email;
 }
-
-
-
-//// getters setters
-//}
-
-//    public String getUsername() {
-//        return username;
-//    }
-//
-//    public void setUsername(String username) {
-//        this.username = username;
-//    }
-//
-//    public String getPassword() {
-//        return password;
-//    }
-//
-//    public void setPassword(String password) {
-//        this.password = password;
-//    }
-//}

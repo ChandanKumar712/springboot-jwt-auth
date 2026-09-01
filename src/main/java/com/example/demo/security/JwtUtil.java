@@ -87,9 +87,15 @@ import java.util.Date;
 
 public class JwtUtil {
 
-    // Secret key
+//////      Secret Key
+//   private static final String SECRET =
+//          "mySuperSecretKeyForJwtTokenGeneration123456";
+
+
+    ////   Secret key from environment variable
     private static final String SECRET =
-            "mySuperSecretKeyForJwtTokenGeneration123456";
+            System.getenv("JWT_SECRET");
+
 
     // Generate signing key
     private static final Key key =

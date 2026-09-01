@@ -38,4 +38,23 @@ public class EmailService {
 
         System.out.println("MAIL SENT SUCCESSFULLY");
     }
+
+    //// For OTP Verification
+    public void sendOtpEmail(String toEmail, String otp) {
+
+        SimpleMailMessage message = new SimpleMailMessage();
+
+        message.setTo(toEmail);
+        message.setSubject("Your Login OTP");
+        message.setText(
+                "Hello,\n\n" +
+                        "Your OTP for login is: " + otp +
+                        "\n\nThis OTP is valid for 5 minutes." +
+                        "\n\nThank You!"
+        );
+
+        mailSender.send(message);
+    }
+
+
 }

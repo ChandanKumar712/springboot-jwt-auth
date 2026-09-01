@@ -178,6 +178,12 @@ import org.springframework.web.bind.annotation.RequestParam;
 import com.example.demo.dto.ForgotPasswordRequestDTO;
 import com.example.demo.dto.ResetPasswordDTO;
 
+/// For otpDTO verification
+import com.example.demo.dto.VerifyOtpDTO;
+
+////   For email, password to OTP verification rather than
+import com.example.demo.dto.LoginRequestDTO;
+
 @RestController
 public class UserController {
 
@@ -216,14 +222,34 @@ public class UserController {
 
     ////    For Email Login Verification
 
+//    @PostMapping("/login")
+//    public ResponseEntity<?> login(
+//            @Valid @RequestBody UserDTO userDTO) {
+//
+//        try {
+//
+//            return ResponseEntity.ok(
+//                    userService.login(userDTO)
+//            );
+//
+//        } catch (RuntimeException e) {
+//
+//            return ResponseEntity
+//                    .status(403)
+//                    .body(e.getMessage());
+//        }
+//    }
+
+
+/////   For email, password  to OTP verification =>  rather than username, password
     @PostMapping("/login")
     public ResponseEntity<?> login(
-            @Valid @RequestBody UserDTO userDTO) {
+            @Valid @RequestBody LoginRequestDTO loginRequestDTO) {
 
         try {
 
             return ResponseEntity.ok(
-                    userService.login(userDTO)
+                    userService.login(loginRequestDTO)
             );
 
         } catch (RuntimeException e) {
@@ -233,6 +259,27 @@ public class UserController {
                     .body(e.getMessage());
         }
     }
+
+        ////// For verify-login-otp
+
+        @PostMapping("/verify-login-otp")
+        public ResponseEntity<?> verifyLoginOtp(
+                @Valid @RequestBody VerifyOtpDTO verifyOtpDTO){
+
+            try {
+                return ResponseEntity.ok(
+                        userService.verifyLoginOtp(
+                                verifyOtpDTO.getEmail(),
+                                verifyOtpDTO.getOtp()
+                        )
+                );
+
+            } catch (RuntimeException e) {
+                return ResponseEntity
+                        .status(403)
+                        .body(e.getMessage());
+            }
+        }
 
     // GET all users
     @GetMapping("/users")
@@ -340,5 +387,4 @@ public class UserController {
                 userService.resetPassword(requestDTO)
         );
     }
-
 }

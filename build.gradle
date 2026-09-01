@@ -20,7 +20,12 @@ repositories {
 dependencies {
 	implementation 'org.springframework.boot:spring-boot-starter-data-jpa'
 	implementation 'org.springframework.boot:spring-boot-starter-web'
-	runtimeOnly 'com.mysql:mysql-connector-j'
+
+	////       For MySQL database
+	// runtimeOnly 'com.mysql:mysql-connector-j'
+
+    ////    For PostgreSQL Database
+	runtimeOnly 'org.postgresql:postgresql'
 
 	compileOnly 'org.projectlombok:lombok'
 	annotationProcessor 'org.projectlombok:lombok'
@@ -48,7 +53,12 @@ dependencies {
 	implementation 'org.springframework.boot:spring-boot-starter-mail'
 
 ////   Implement For API Rate Limiting
-	implementation 'com.bucket4j:bucket4j-core:8.0.1'
+	//// implementation 'io.github.bucket4j:bucket4j-core:8.10.1'
+	/// implementation 'com.bucket4j:bucket4j_jdk17-core:8.10.1'
+	//// implementation 'com.bucket4j:bucket4j-core:8.14.0'
+	//implementation 'com.bucket4j:bucket4j_jdk17-core:8.15.0'
+
+	implementation 'com.bucket4j:bucket4j_jdk17-core:8.14.0'
 }
 
 tasks.named('test') {

@@ -28,6 +28,7 @@ import jakarta.persistence.*;
 import lombok.Data;
 
 @Entity
+@Table(name = "users")
 @Data
 public class User {
 
@@ -37,6 +38,10 @@ public class User {
 
     @Column(unique = true)
     private String username;
+
+    // Add email field
+    @Column(unique = true)
+    private String email;
 
     private String password;
 

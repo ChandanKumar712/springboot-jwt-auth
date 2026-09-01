@@ -36,3 +36,6 @@ out/
 
 ### VS Code ###
 .vscode/
+
+# MySQL dummy/test query file
+query

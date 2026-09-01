@@ -232,11 +232,21 @@ import org.slf4j.LoggerFactory;
 import com.example.demo.dto.LogoutRequestDTO;
 import org.springframework.transaction.annotation.Transactional;
 
-/////   For Email Verification System
-import com.example.demo.model.VerificationToken;
-import com.example.demo.repository.VerificationTokenRepository;
+/////  For Email Verification System -->  This isn't Used Bcz of OTP Verification
+// import com.example.demo.model.VerificationToken;
+// import com.example.demo.repository.VerificationTokenRepository;
+
 import java.util.UUID;
 import org.springframework.mail.javamail.JavaMailSender;
+
+//// For OTP generation
+import com.example.demo.model.OtpToken;
+import com.example.demo.repository.OtpTokenRepository;
+import java.time.LocalDateTime;
+
+///// to email and password  for OTP verification  rather than username
+import com.example.demo.dto.LoginRequestDTO;
+
 
 /////    For Forgot Password
 import com.example.demo.model.PasswordResetToken;
@@ -257,11 +267,14 @@ public class UserService {
     @Autowired
     private RefreshTokenRepository refreshTokenRepository;
 
-    @Autowired
-    private VerificationTokenRepository verificationTokenRepository;
+//    @Autowired
+//    private VerificationTokenRepository verificationTokenRepository;
 
     @Autowired
     private EmailService emailService;
+
+    @Autowired
+    private OtpTokenRepository otpTokenRepository;
 
     @Autowired
     private PasswordResetTokenRepository passwordResetTokenRepository;
@@ -283,10 +296,12 @@ public class UserService {
 
         User user = new User();
         user.setUsername(userDTO.getUsername());
+        user.setEmail(userDTO.getEmail());
         user.setPassword(encoder.encode(userDTO.getPassword()));
 
         ////  For ROLE-BASED AUTHORIZATION --> Implemented role-based authorization using Spring Security and JWT.
         user.setRole("USER");
+        user.setEnabled(true);   // no email verification needed now
 
         /////  Logger Implementation
         logger.info("New user registration attempt: {}", userDTO.getUsername());
@@ -295,23 +310,24 @@ public class UserService {
 
         userRepository.save(user);
 
-            // GENERATE TOKEN
-        String token = UUID.randomUUID().toString();
+//            // GENERATE TOKEN
+//        String token = UUID.randomUUID().toString();
+//
+//           // SAVE TOKEN
+//        VerificationToken verificationToken =
+//                new VerificationToken();
+//
+//        verificationToken.setToken(token);
+//        verificationToken.setUsername(user.getUsername());
+//
+//        verificationTokenRepository.save(verificationToken);
+//
+//           // SEND EMAIL
+//        emailService.sendVerificationEmail(
+//                user.getUsername(),
+//                token
+//        );
 
-           // SAVE TOKEN
-        VerificationToken verificationToken =
-                new VerificationToken();
-
-        verificationToken.setToken(token);
-        verificationToken.setUsername(user.getUsername());
-
-        verificationTokenRepository.save(verificationToken);
-
-           // SEND EMAIL
-        emailService.sendVerificationEmail(
-                user.getUsername(),
-                token
-        );
 
         logger.info("User registered successfully: {}", user.getUsername());
 
@@ -342,89 +358,239 @@ public class UserService {
 //        throw new RuntimeException("Wrong password");
 //    }
 
-    public LoginResponseDTO login(UserDTO userDTO) {
 
-        User existingUser =
-                userRepository.findByUsername(userDTO.getUsername());
+    ////// Old with email verification
 
+//    public LoginResponseDTO login(UserDTO userDTO) {
+//
+//        User existingUser =
+//                userRepository.findByUsername(userDTO.getUsername());
+//
+////        if (existingUser == null) {
+////          //  throw new RuntimeException("User not found");
+////
+////            if (!existingUser.isEnabled()) {
+////                throw new RuntimeException(
+////                        "Please verify your email first"
+////                );
+////            }
+////
+////            /////   Logger Implementation
+////            logger.error("Login failed. User not found: {}", userDTO.getUsername());
+////            throw new UserNotFoundException("User not found");
+////        }
+//
+//
+//        //////   For Email login verification
+//
 //        if (existingUser == null) {
-//          //  throw new RuntimeException("User not found");
 //
-//            if (!existingUser.isEnabled()) {
-//                throw new RuntimeException(
-//                        "Please verify your email first"
-//                );
-//            }
-//
-//            /////   Logger Implementation
 //            logger.error("Login failed. User not found: {}", userDTO.getUsername());
+//
 //            throw new UserNotFoundException("User not found");
 //        }
+//
+//            // EMAIL VERIFICATION CHECK
+//        if (!existingUser.isEnabled()) {
+//
+//            logger.error("Email not verified for user: {}",
+//                    userDTO.getUsername());
+//
+//            throw new RuntimeException(
+//                    "Please verify your email first"
+//            );
+//        }
+//
+//                   //// PASSWORD CHECK
+//        if (!encoder.matches(
+//                userDTO.getPassword(),
+//                existingUser.getPassword())) {
+//
+//            logger.error("Wrong password for user: {}",
+//                    userDTO.getUsername());
+//
+//            throw new InvalidCredentialsException("Wrong password");
+//        }
+//     //////     Implement Logger
+//        logger.info("User logged in successfully: {}",
+//                existingUser.getUsername());
+//
+//        // ACCESS TOKEN
+//        String accessToken =
+//                JwtUtil.generateToken(
+//                        existingUser.getUsername(),
+//                        existingUser.getRole()
+//                );
+//
+//        // REFRESH TOKEN
+//        String refreshToken =
+//                JwtUtil.generateRefreshToken(
+//                        existingUser.getUsername()
+//                );
+//
+//        // SAVE REFRESH TOKEN
+//        RefreshToken tokenObj = new RefreshToken();
+//
+//        tokenObj.setUsername(existingUser.getUsername());
+//        tokenObj.setRefreshToken(refreshToken);
+//
+//        refreshTokenRepository.save(tokenObj);
+//
+//        // RESPONSE DTO
+//        LoginResponseDTO response = new LoginResponseDTO();
+//
+//        response.setAccessToken(accessToken);
+//        response.setRefreshToken(refreshToken);
+//
+//        return response;
+//    }
+//
 
 
-        //////   For Email login verification
+    /////  This method is Use for OTP verification Rather Than Email Verification
+    /////  BUt here username, email and password 3 things are required which is not suitable
+
+//    public String login(UserDTO userDTO) {
+//
+//        User existingUser =
+//                userRepository.findByEmail(userDTO.getEmail());
+//
+//        if (existingUser == null) {
+//            logger.error("Login failed. Email not found: {}", userDTO.getEmail());
+//            throw new UserNotFoundException("User not found");
+//        }
+//
+//        if (!encoder.matches(
+//                userDTO.getPassword(),
+//                existingUser.getPassword())) {
+//
+//            logger.error("Wrong password for email: {}", userDTO.getEmail());
+//            throw new InvalidCredentialsException("Wrong password");
+//        }
+//
+//        // GENERATE OTP
+//        String otp = String.valueOf(
+//                (int) (100000 + Math.random() * 900000)
+//        );
+//
+//        OtpToken otpToken = new OtpToken();
+//        otpToken.setEmail(existingUser.getEmail());
+//        otpToken.setOtp(otp);
+//        otpToken.setExpiryTime(LocalDateTime.now().plusMinutes(5));
+//        otpToken.setVerified(false);
+//
+//        otpTokenRepository.save(otpToken);
+//
+//        emailService.sendOtpEmail(existingUser.getEmail(), otp);
+//
+//        logger.info("OTP sent to: {}", existingUser.getEmail());
+//
+//        return "OTP sent successfully";
+//    }
+
+
+    ///// This is for just Email and Password Verification
+
+    public String login(LoginRequestDTO loginRequestDTO) {
+
+        User existingUser =
+                userRepository.findByEmail(loginRequestDTO.getEmail());
 
         if (existingUser == null) {
-
-            logger.error("Login failed. User not found: {}", userDTO.getUsername());
-
+            logger.error("Login failed. Email not found: {}", loginRequestDTO.getEmail());
             throw new UserNotFoundException("User not found");
         }
 
-            // EMAIL VERIFICATION CHECK
-        if (!existingUser.isEnabled()) {
-
-            logger.error("Email not verified for user: {}",
-                    userDTO.getUsername());
-
-            throw new RuntimeException(
-                    "Please verify your email first"
-            );
-        }
-
-                   //// PASSWORD CHECK
         if (!encoder.matches(
-                userDTO.getPassword(),
+                loginRequestDTO.getPassword(),
                 existingUser.getPassword())) {
 
-            logger.error("Wrong password for user: {}",
-                    userDTO.getUsername());
-
+            logger.error("Wrong password for email: {}", loginRequestDTO.getEmail());
             throw new InvalidCredentialsException("Wrong password");
         }
-     //////     Implement Logger
-        logger.info("User logged in successfully: {}",
-                existingUser.getUsername());
+
+        // GENERATE OTP
+        String otp = String.valueOf(
+                (int) (100000 + Math.random() * 900000)
+        );
+
+        OtpToken otpToken = new OtpToken();
+        otpToken.setEmail(existingUser.getEmail());
+        otpToken.setOtp(otp);
+        otpToken.setExpiryTime(LocalDateTime.now().plusMinutes(5));
+        otpToken.setVerified(false);
+
+        otpTokenRepository.save(otpToken);
+
+        emailService.sendOtpEmail(existingUser.getEmail(), otp);
+
+        logger.info("OTP sent to: {}", existingUser.getEmail());
+
+        return "OTP sent successfully";
+    }
+
+
+
+
+    ///// For  /verify-login-otp endpoint
+
+    public LoginResponseDTO verifyLoginOtp(String email, String otp) {
+
+        OtpToken otpToken =
+                otpTokenRepository.findTopByEmailOrderByIdDesc(email);
+
+        if (otpToken == null) {
+            throw new RuntimeException("OTP not found. Please login again.");
+        }
+
+        if (otpToken.isVerified()) {
+            throw new RuntimeException("OTP already used. Please login again.");
+        }
+
+        if (otpToken.getExpiryTime().isBefore(LocalDateTime.now())) {
+            throw new RuntimeException("OTP expired. Please login again.");
+        }
+
+        if (!otpToken.getOtp().equals(otp)) {
+            throw new InvalidCredentialsException("Invalid OTP");
+        }
+
+        otpToken.setVerified(true);
+        otpTokenRepository.save(otpToken);
+
+        User user = userRepository.findByEmail(email);
+
+        if (user == null) {
+            throw new UserNotFoundException("User not found");
+        }
 
         // ACCESS TOKEN
         String accessToken =
                 JwtUtil.generateToken(
-                        existingUser.getUsername(),
-                        existingUser.getRole()
+                        user.getUsername(),
+                        user.getRole()
                 );
 
         // REFRESH TOKEN
         String refreshToken =
                 JwtUtil.generateRefreshToken(
-                        existingUser.getUsername()
+                        user.getUsername()
                 );
 
-        // SAVE REFRESH TOKEN
         RefreshToken tokenObj = new RefreshToken();
-
-        tokenObj.setUsername(existingUser.getUsername());
+        tokenObj.setUsername(user.getUsername());
         tokenObj.setRefreshToken(refreshToken);
 
         refreshTokenRepository.save(tokenObj);
 
-        // RESPONSE DTO
         LoginResponseDTO response = new LoginResponseDTO();
-
         response.setAccessToken(accessToken);
         response.setRefreshToken(refreshToken);
 
         return response;
     }
+
+
 
     // Get all users (DTO)
     public List<UserResponseDTO> getAllUsers() {
@@ -633,80 +799,88 @@ public class UserService {
         }).toList();
     }
 
-    public String verifyUser(String token) {
 
-        VerificationToken verificationToken =
-                verificationTokenRepository.findByToken(token);
-
-        if (verificationToken == null) {
-            return "Invalid Token";
-        }
-
-        User user =
-                userRepository.findByUsername(
-                        verificationToken.getUsername()
-                );
-
-        if (user == null) {
-            return "User not found";
-        }
-
-        user.setEnabled(true);
-
-        userRepository.save(user);
-
-       // verificationTokenRepository.delete(verificationToken);
-
-        return "Email Verified Successfully";
-    }
+    /////  This is for OTP verification password Reset
 
     public String forgotPassword(ForgotPasswordRequestDTO requestDTO) {
 
-        User user = userRepository.findByUsername(requestDTO.getUsername());
+        User user = userRepository.findByEmail(requestDTO.getEmail());
 
-        if(user == null) {
-            throw new RuntimeException("User not found");
+        if (user == null) {
+            throw new UserNotFoundException("User not found");
         }
 
-        String token = UUID.randomUUID().toString();
+        String otp = String.valueOf(
+                (int) (100000 + Math.random() * 900000)
+        );
 
         PasswordResetToken resetToken =
-                new PasswordResetToken(token, user.getUsername());
+                new PasswordResetToken(
+                        otp,
+                        user.getEmail(),
+                        LocalDateTime.now().plusMinutes(5)
+                );
 
         passwordResetTokenRepository.save(resetToken);
 
-        String resetLink =
-                "http://localhost:8082/reset-password?token=" + token;
+        emailService.sendOtpEmail(user.getEmail(), otp);
 
-        System.out.println("RESET LINK: " + resetLink);
+        logger.info("Password reset OTP sent to: {}", user.getEmail());
 
-        SimpleMailMessage message = new SimpleMailMessage();
-
-        message.setTo(user.getUsername());
-
-        message.setSubject("Password Reset Request");
-
-        message.setText(
-                "Click below link to reset password:\n" + resetLink
-        );
-
-        mailSender.send(message);
-
-        return "Password reset link sent to email";
+        return "OTP sent to email for password reset";
     }
 
+
+
+    ///////  Just for email verification not used any OTP
+
+//    public String resetPassword(ResetPasswordDTO requestDTO) {
+//
+//        PasswordResetToken resetToken =
+//                passwordResetTokenRepository
+//                        .findByToken(requestDTO.getToken())
+//                        .orElseThrow(() ->
+//                                new RuntimeException("Invalid token"));
+//
+//        User user = userRepository.findByUsername(resetToken.getUsername());
+//
+//        if(user == null) {
+//            throw new RuntimeException("User not found");
+//        }
+//
+//        user.setPassword(
+//                passwordEncoder.encode(requestDTO.getNewPassword())
+//        );
+//
+//        userRepository.save(user);
+//
+//        passwordResetTokenRepository.delete(resetToken);
+//
+//        return "Password updated successfully";
+//    }
+
+
+    //////   This is for the OTP based reset/forget for verification
     public String resetPassword(ResetPasswordDTO requestDTO) {
 
         PasswordResetToken resetToken =
                 passwordResetTokenRepository
-                        .findByToken(requestDTO.getToken())
+                        .findByToken(requestDTO.getOtp())
                         .orElseThrow(() ->
-                                new RuntimeException("Invalid token"));
+                                new RuntimeException("Invalid OTP"));
 
-        User user = userRepository.findByUsername(resetToken.getUsername());
+        if (!resetToken.getUsername().equals(requestDTO.getEmail())) {
+            throw new RuntimeException("Invalid OTP for this email");
+        }
 
-        if(user == null) {
-            throw new RuntimeException("User not found");
+        if (resetToken.getExpiryTime().isBefore(LocalDateTime.now())) {
+            throw new RuntimeException("OTP expired. Please try again.");
+        }
+
+        User user = userRepository.findByEmail(resetToken.getUsername());
+
+        if (user == null) {
+            throw new UserNotFoundException("User not found");
         }
 
         user.setPassword(
@@ -719,6 +893,5 @@ public class UserService {
 
         return "Password updated successfully";
     }
-
 
 }
