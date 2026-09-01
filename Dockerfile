@@ -1,8 +1,16 @@
+FROM gradle:8.7-jdk17 AS build
+
+WORKDIR /app
+
+COPY . .
+
+RUN gradle build -x test
+
 FROM eclipse-temurin:17
 
 WORKDIR /app
 
-COPY build/libs/demo-0.0.1-SNAPSHOT.jar app.jar
+COPY --from=build /app/build/libs/*.jar app.jar
 
 EXPOSE 8082
 
