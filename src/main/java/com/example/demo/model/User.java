@@ -49,5 +49,7 @@ public class User {
 
     private boolean enabled = false;
 
+    private boolean blocked = false;
+
 
 }

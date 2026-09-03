@@ -300,6 +300,32 @@ public class UserController {
         return ResponseEntity.ok(userService.deleteUser(id));
     }
 
+
+
+    //// Block Features for ADMIN
+
+    @PreAuthorize("hasRole('ADMIN')")
+    @PutMapping("/users/{id}/block")
+    public ResponseEntity<String> blockUser(@PathVariable Long id) {
+        return ResponseEntity.ok(userService.blockUser(id));
+    }
+
+    @PreAuthorize("hasRole('ADMIN')")
+    @PutMapping("/users/{id}/unblock")
+    public ResponseEntity<String> unblockUser(@PathVariable Long id) {
+        return ResponseEntity.ok(userService.unblockUser(id));
+    }
+
+    @PreAuthorize("hasRole('ADMIN')")
+    @PutMapping("/users/{id}/role")
+    public ResponseEntity<String> changeUserRole(
+            @PathVariable Long id,
+            @RequestParam String role) {
+        return ResponseEntity.ok(userService.changeUserRole(id, role));
+    }
+
+
+
     // UPDATE
     @PutMapping("/users/{id}")
     public ResponseEntity<User> updateUser(@PathVariable Long id, @RequestBody User user) {

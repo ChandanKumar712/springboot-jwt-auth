@@ -501,6 +501,13 @@ public class UserService {
             throw new UserNotFoundException("User not found");
         }
 
+
+        if (existingUser.isBlocked()) {
+            logger.error("Login blocked for user: {}", loginRequestDTO.getEmail());
+            throw new RuntimeException("Your account has been blocked. Contact admin.");
+        }
+
+
         if (!encoder.matches(
                 loginRequestDTO.getPassword(),
                 existingUser.getPassword())) {
@@ -599,6 +606,7 @@ public class UserService {
             UserResponseDTO dto = new UserResponseDTO();
             dto.setId(user.getId());
             dto.setUsername(user.getUsername());
+            dto.setRole(user.getRole());
             return dto;
         }).toList();
     }
@@ -633,6 +641,55 @@ public class UserService {
 
         return "User deleted";
     }
+
+
+
+    ////  Blocked Feature For ADMIN
+
+    public String blockUser(Long id) {
+
+        User user = userRepository.findById(id)
+                .orElseThrow(() ->
+                        new UserNotFoundException("User not found"));
+
+        user.setBlocked(true);
+        userRepository.save(user);
+
+        logger.warn("User blocked with id: {}", id);
+
+        return "User blocked successfully";
+    }
+
+    public String unblockUser(Long id) {
+
+        User user = userRepository.findById(id)
+                .orElseThrow(() ->
+                        new UserNotFoundException("User not found"));
+
+        user.setBlocked(false);
+        userRepository.save(user);
+
+        logger.info("User unblocked with id: {}", id);
+
+        return "User unblocked successfully";
+    }
+
+    public String changeUserRole(Long id, String newRole) {
+
+        User user = userRepository.findById(id)
+                .orElseThrow(() ->
+                        new UserNotFoundException("User not found"));
+
+        user.setRole(newRole);
+        userRepository.save(user);
+
+        logger.info("Role changed for user id: {} to {}", id, newRole);
+
+        return "User role updated to " + newRole;
+    }
+
+
+
 
     // Update
     public User updateUser(Long id, User updatedUser) {
