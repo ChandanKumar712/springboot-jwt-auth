@@ -70,4 +70,20 @@ public class GlobalExceptionHandler {
 
         return new ResponseEntity<>(error, HttpStatus.UNAUTHORIZED);
     }
+
+
+    @ExceptionHandler(UserAlreadyExistsException.class)
+    public ResponseEntity<Map<String, Object>> handleUserAlreadyExists(
+            UserAlreadyExistsException ex) {
+
+        Map<String, Object> error = new HashMap<>();
+
+        error.put("timestamp", LocalDateTime.now());
+        error.put("status", 409);
+        error.put("error", "Conflict");
+        error.put("message", ex.getMessage());
+
+        return new ResponseEntity<>(error, HttpStatus.CONFLICT);
+    }
+
 }

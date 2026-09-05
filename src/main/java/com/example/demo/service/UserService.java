@@ -202,6 +202,8 @@ import com.example.demo.security.JwtUtil;
 
 import org.springframework.beans.factory.annotation.Autowired;
 // import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.stereotype.Service;
 
@@ -256,6 +258,9 @@ import com.example.demo.dto.ForgotPasswordRequestDTO;
 import com.example.demo.dto.ResetPasswordDTO;
 import org.springframework.security.crypto.password.PasswordEncoder;
 
+////   For Signup duplicate id resolve
+import com.example.demo.exception.UserAlreadyExistsException;
+
 
 @Service
 public class UserService {
@@ -289,10 +294,16 @@ public class UserService {
     // Signup
     public String signup(UserDTO userDTO) {
 
-        User existing = userRepository.findByUsername(userDTO.getUsername());
-        if (existing != null) {
-            return "Username already exists";
+        User existingUsername = userRepository.findByUsername(userDTO.getUsername());
+        if (existingUsername != null) {
+            throw new UserAlreadyExistsException("Username already exists");
         }
+
+        User existingEmail = userRepository.findByEmail(userDTO.getEmail());
+        if (existingEmail != null) {
+            throw new UserAlreadyExistsException("Email already registered");
+        }
+
 
         User user = new User();
         user.setUsername(userDTO.getUsername());
@@ -309,25 +320,6 @@ public class UserService {
         // userRepository.save(user);
 
         userRepository.save(user);
-
-//            // GENERATE TOKEN
-//        String token = UUID.randomUUID().toString();
-//
-//           // SAVE TOKEN
-//        VerificationToken verificationToken =
-//                new VerificationToken();
-//
-//        verificationToken.setToken(token);
-//        verificationToken.setUsername(user.getUsername());
-//
-//        verificationTokenRepository.save(verificationToken);
-//
-//           // SEND EMAIL
-//        emailService.sendVerificationEmail(
-//                user.getUsername(),
-//                token
-//        );
-
 
         logger.info("User registered successfully: {}", user.getUsername());
 
